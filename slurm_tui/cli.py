@@ -8,6 +8,7 @@ import sys
 
 import logzero
 from logzero import logger
+from simple_term_menu import TerminalMenu
 import requests
 
 
@@ -22,15 +23,41 @@ def set_jwt_token(force: bool) -> None:
         logger.info(f"Setting SLURM_JWT to {stripped_token}")
 
 
-def call_diag(args):
-    res = requests.get(
-        f"{args.server}/slurm/{args.api_version}/diag",
+def request_to(args, url_suffix, method="GET"):
+    return requests.request(
+        method=method,
+        url=f"{args.server}/slurm/{args.api_version}/{url_suffix}",
         headers={
             "X-SLURM-USER-NAME": os.environ["LOGNAME"],
             "X-SLURM-USER-TOKEN": os.environ["SLURM_JWT"],
         },
     )
-    logger.info("diag: %s", json.dumps(res.json(), indent=2))
+
+
+def run_scancel(args):
+    """Allows users to scancel their jobs.
+
+    First queries for jobs with REST API and displays list of user's jobs to user.
+    The user can select one job and the job will be deleted if it works.
+    """
+    # list jobs
+    username = os.environ["LOGNAME"]
+    jobs = request_to(args, "jobs").json()["jobs"]
+    my_jobs = [job for job in jobs if job["user_name"] == username]
+
+    # user selects job
+    logger.info("Which job to kill? Enter to select, Ctrl-C to cancel")
+    job_idx = TerminalMenu(["%s -- %s" % (job["job_id"], job["name"]) for job in my_jobs]).show()
+    job = my_jobs[job_idx]
+
+    # job is canceled
+    resp = request_to(args, f"job/%s" % job["job_id"], method="DELETE")
+    resp.raise_for_status()
+    resp_json = resp.json()
+    if resp_json["errors"]:
+        logger.error("Problem deleting job: %s", resp_json)
+    else:
+        logger.info("Deleted job %s", job["job_id"])
 
 
 def main():
@@ -47,6 +74,7 @@ def main():
     )
     parser.add_argument("--api-version", default="v0.0.37")
     parser.add_argument("--server", required=True, help="Base URL to Slurm REST Server")
+    parser.add_argument("command", choices=["scancel"])
     args = parser.parse_args()
 
     # Setup logging verbosity.
@@ -62,7 +90,9 @@ def main():
 
     logger.info("args = %s", json.dumps(vars(args), indent=2))
 
-    call_diag(args)
+    {"scancel": run_scancel,}[
+        args.command
+    ](args)
 
     logger.info("All done, have a nice day!")
     return 0
