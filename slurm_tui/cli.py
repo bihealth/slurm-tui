@@ -14,7 +14,7 @@ import requests
 
 def set_jwt_token(force: bool) -> None:
     """Set SLURM_JWT from ``scontrol token`` if not set or ``force``"""
-    if "SLURM_JWT" in os.environ and not force:
+    if "SLURM_JWT" not in os.environ or force:
         line = subprocess.check_output(["scontrol", "token"], shell=True)
         arr = line.splitlines()[0].strip().split("=")
         token = arr[1]
