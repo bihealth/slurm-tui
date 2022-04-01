@@ -48,14 +48,16 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     description="Slurm Text User Interface using the Slurm REST API in Python.",
-    entry_points={"console_scripts": ["slurm_tui=slurm_tui.cli:main"]},
+    entry_points={"console_scripts": ["slurm-tui=slurm_tui.cli:main"]},
     install_requires=requirements,
     license="MIT license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="slurm",
     name="slurm-tui",
-    packages=find_packages(include=["slurm_tui", "slurm_tui.*"]),
+    packages=find_packages(
+        include=["slurm_tui", "slurm_tui.*", "slurm_rest_api_client", "slurm_rest_api_client.*"]
+    ),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/holtgrewe/slurm_tui",
