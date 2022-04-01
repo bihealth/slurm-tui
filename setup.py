@@ -28,8 +28,6 @@ with open("README.md") as readme_file:
 with open("CHANGELOG.md") as history_file:
     history = history_file.read()
 
-requirements = []
-
 test_requirements = parse_requirements("requirements/test.txt")
 install_requirements = parse_requirements("requirements/base.txt")
 
@@ -49,7 +47,7 @@ setup(
     ],
     description="Slurm Text User Interface using the Slurm REST API in Python.",
     entry_points={"console_scripts": ["slurm-tui=slurm_tui.cli:main"]},
-    install_requires=requirements,
+    install_requires=install_requirements,
     license="MIT license",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/markdown",
