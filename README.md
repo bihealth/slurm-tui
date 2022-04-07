@@ -5,8 +5,24 @@ Slurm Text User Interface using the Slurm REST API in Python.
 - Free software: MIT license
 - Documentation: https://github.com/bihealth/slurm-tui
 
-## Usage Example
+## Installation
 
+First obtain a JWT token using the following command:
+
+```
+$ scontrol token
+JWT_TOKEN=...
+```
+
+Insert the token into your `.bashrc` or `.profile`. Using a command such as `export JWT_TOKEN=...`
+
+Now slurm-tui can be installed via pip. Preferably in a conda environment or python venv.
+
+```
+$ pip install slurm-tui
+```
+
+## Usage Example
 
 ```
 # slurm-tui --server=http://hpc-slurmrestd scancel
